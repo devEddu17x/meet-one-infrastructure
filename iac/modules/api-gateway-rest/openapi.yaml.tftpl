@@ -1,0 +1,37 @@
+openapi: "3.0.1"
+
+info:
+  title: "${name_prefix}-api"
+  version: "1.0.0"
+
+paths:
+  /health:
+    get:
+      summary: "Health Check Endpoint (MOCK)"
+      responses:
+        "200":
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Empty"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        passthroughBehavior: "when_no_match"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: |
+                {
+                  "status": "ok",
+                  "message": "The API Gateway is reachable!"
+                }
+
+components:
+  schemas:
+    Empty:
+      title: "Empty Schema"
+      type: "object"
