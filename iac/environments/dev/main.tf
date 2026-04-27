@@ -2,7 +2,7 @@ module "cognito" {
   source                       = "../../modules/cognito"
   name_prefix                  = "${var.project_name}-${var.environment}"
   app_email_subject            = "${var.project_name} - Verify your email"
-  post_confirmation_lambda_arn = module.lambda.lambda_invoke_arns["add_to_group"]
+  post_confirmation_lambda_arn = module.lambda.lambda_arns["add_to_group"]
 }
 
 module "dynamodb" {
