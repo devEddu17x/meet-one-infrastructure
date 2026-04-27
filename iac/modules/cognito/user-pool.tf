@@ -4,7 +4,9 @@ resource "aws_cognito_user_pool" "pool" {
 
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
-
+  lambda_config {
+    post_confirmation = var.post_confirmation_lambda_arn
+  }
   password_policy {
     minimum_length                   = 8
     require_lowercase                = true
