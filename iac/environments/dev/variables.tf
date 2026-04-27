@@ -13,7 +13,7 @@ variable "aws_profile" {
 variable "project_name" {
   description = "Project identifier used in naming and tagging"
   type        = string
-  default     = "galaxy-morph"
+  default     = "meet-one"
 }
 
 variable "environment" {
