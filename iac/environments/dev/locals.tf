@@ -1,3 +1,19 @@
+data "aws_iam_policy_document" "create_profile_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["dynamodb:PutItem"]
+    resources = [module.dynamodb.dynamodb_users_table_arn]
+  }
+}
+
+data "aws_iam_policy_document" "get_profile_policy" {
+  statement {
+    effect    = "Allow"
+    actions   = ["dynamodb:GetItem"]
+    resources = [module.dynamodb.dynamodb_users_table_arn]
+  }
+}
+
 locals {
   default_tags = {
     Project     = var.project_name
@@ -15,15 +31,7 @@ locals {
       }
       timeout     = 3
       memory_size = 256
-      role_policy = jsonencode({
-        version = "2012-10-17"
-        statement = [
-          { Effect   = "Allow"
-            Action   = ["dynamodb:PutItem"]
-            Resource = module.dynamodb.dynamodb_users_table_arn
-          }
-        ]
-      })
+      role_policy = data.aws_iam_policy_document.create_profile_policy.json
     }
 
     "get_profile" = {
@@ -35,15 +43,7 @@ locals {
       }
       timeout     = 3
       memory_size = 256
-      role_policy = jsonencode({
-        version = "2012-10-17"
-        statement = [
-          { Effect   = "Allow"
-            Action   = ["dynamodb:GetItem"]
-            Resource = module.dynamodb.dynamodb_users_table_arn
-          }
-        ]
-      })
+      role_policy = data.aws_iam_policy_document.get_profile_policy.json
     }
   }
 }
