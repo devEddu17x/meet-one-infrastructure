@@ -3,7 +3,9 @@ resource "aws_api_gateway_rest_api" "api" {
   description = "REST API for ${var.name_prefix}"
 
   body = templatefile("${path.module}/openapi.yaml.tftpl", {
-    name_prefix = var.name_prefix
+    name_prefix                      = var.name_prefix
+    create_profile_lambda_invoke_arn = var.create_profile_lambda_invoke_arn
+    get_profile_lambda_invoke_arn    = var.get_profile_lambda_invoke_arn
   })
 
   endpoint_configuration {
