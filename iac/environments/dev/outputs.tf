@@ -48,6 +48,12 @@ output "dynamodb_matchmaking_table_arn" {
   value       = module.dynamodb.dynamodb_matchmaking_table_arn
 }
 
+output "lambda_arns" {
+  value = module.lambda.lambda_arns
+}
+output "lambda_names" {
+  value = module.lambda.lambda_names
+}
 
 output "api_id" {
   description = "The ID of the API Gateway"
