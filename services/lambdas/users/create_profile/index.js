@@ -28,6 +28,12 @@ export const handler = async (event) => {
     const body = JSON.parse(event.body);
     const parsed = UserSchema.parse(body);
 
+    if (!userId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "User ID is required" }),
+      };
+    }
     const item = {
       userId: { S: userId },
       name: { S: parsed.name },

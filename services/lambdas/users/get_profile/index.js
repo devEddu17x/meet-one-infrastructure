@@ -4,8 +4,13 @@ const client = new DynamoDBClient();
 
 export const handler = async (event) => {
   try {
-    const userId = event.requestContext.authorizer.claims.sub;
-
+    const userId = event.requestContext.authorizer?.claims?.sub;
+    if (!userId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "User ID is required" }),
+      };
+    }
     const { Item } = await client.send(
       new GetItemCommand({
         TableName: process.env.USERS_TABLE,
