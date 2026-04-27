@@ -28,8 +28,12 @@ data "aws_iam_policy_document" "add_to_group_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "cognito-idp:AdminAddUserToGroup"
+      "cognito-idp:AdminAddUserToGroup",
+      "dynamodb:GetItem",
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
     ]
-    resources = ["*"]
+    resources = ["*", "arn:aws:logs:*:*:*"]
   }
 }
