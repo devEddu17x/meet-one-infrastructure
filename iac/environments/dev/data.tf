@@ -23,3 +23,13 @@ data "aws_iam_policy_document" "get_profile_policy" {
     resources = [module.dynamodb.dynamodb_users_table_arn, "arn:aws:logs:*:*:*"]
   }
 }
+
+data "aws_iam_policy_document" "add_to_group_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "cognito-idp:AdminAddUserToGroup"
+    ]
+    resources = ["*"]
+  }
+}
