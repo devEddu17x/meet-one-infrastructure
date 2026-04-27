@@ -1,11 +1,11 @@
-import {
+const {
   CognitoIdentityProviderClient,
   AdminAddUserToGroupCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
+} = require("@aws-sdk/client-cognito-identity-provider");
 
 const client = new CognitoIdentityProviderClient();
 
-export const handler = async (event) => {
+exports.handler = async (event) => {
   const userPoolId = event.userPoolId;
   const username = event.userName;
   const groupName = "public-user";
