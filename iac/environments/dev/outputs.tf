@@ -55,6 +55,10 @@ output "lambda_names" {
   value = module.lambda.lambda_names
 }
 
+output "lambda_invoke_arns" {
+  value = module.lambda.lambda_invoke_arns
+}
+
 output "api_id" {
   description = "The ID of the API Gateway"
   value       = module.api_gateway_rest.api_id
