@@ -29,9 +29,55 @@ paths:
                   "status": "ok",
                   "message": "The API Gateway is reachable!"
                 }
-
+  /users/profile:
+    post:
+      summary: Create user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfile"
+      responses:
+        "201":
+          description: Profile created
+        "400":
+          description: Validation error
+        "409":
+          description: Profile already exists
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${create_profile_lambda_invoke_arn}
+    get:
+      summary: Get user profile
+      responses:
+        "200":
+          description: Profile found
+        "404":
+          description: Profile not found
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: ${get_profile_lambda_invoke_arn}
 components:
   schemas:
     Empty:
       title: "Empty Schema"
       type: "object"
+    UserProfile:
+      type: object
+      required: [name, email, nativeLanguage, targetLanguage, gender, location]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        nativeLanguage:
+          type: string
+        targetLanguage:
+          type: string
+        gender:
+          type: string
+        location:
+          type: string
