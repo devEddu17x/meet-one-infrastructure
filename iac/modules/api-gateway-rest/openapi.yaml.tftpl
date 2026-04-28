@@ -4,10 +4,14 @@ info:
   title: "${name_prefix}-api"
   version: "1.0.0"
 
+security:
+  - cognito_authorizer: []
+
 paths:
   /health:
     get:
       summary: "Health Check Endpoint (MOCK)"
+      security: [] # El health check debe ser público
       responses:
         "200":
           description: "200 response"
@@ -29,9 +33,12 @@ paths:
                   "status": "ok",
                   "message": "The API Gateway is reachable!"
                 }
+
   /users/profile:
     post:
       summary: Create user profile
+      security:
+        - cognito_authorizer: []
       requestBody:
         required: true
         content:
@@ -51,6 +58,8 @@ paths:
         uri: ${create_profile_lambda_invoke_arn}
     get:
       summary: Get user profile
+      security:
+        - cognito_authorizer: []
       responses:
         "200":
           description: Profile found
@@ -60,7 +69,19 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri: ${get_profile_lambda_invoke_arn}
+
 components:
+  securitySchemes:
+    cognito_authorizer:
+      type: "apiKey"
+      name: "Authorization"
+      in: "header"
+      x-amazon-apigateway-authtype: "cognito_user_pools"
+      x-amazon-apigateway-authorizer:
+        type: "cognito_user_pools"
+        providerARNs:
+          - "${cognito_user_pool_arn}"
+  
   schemas:
     Empty:
       title: "Empty Schema"

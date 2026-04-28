@@ -1,13 +1,12 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { z } from "zod";
 import { countries } from "./countries.js";
-import { languages } from "./languages.js";
+import { languages } from "./language.js";
 
 const client = new DynamoDBClient();
 
 const UserSchema = z.object({
   name: z.string().min(1).max(100),
-  email: z.string().email(),
   nativeLanguage: z.string().refine((v) => languages.includes(v), {
     message: "Invalid native language",
   }),
@@ -27,6 +26,7 @@ export const handler = async (event) => {
     const userId = event.requestContext.authorizer.claims.sub;
     const body = JSON.parse(event.body);
     const parsed = UserSchema.parse(body);
+    const email = event.requestContext.authorizer.claims.email;
 
     if (!userId) {
       return {
@@ -37,7 +37,7 @@ export const handler = async (event) => {
     const item = {
       userId: { S: userId },
       name: { S: parsed.name },
-      email: { S: parsed.email },
+      email: { S: email },
       nativeLanguage: { S: parsed.nativeLanguage },
       targetLanguage: { S: parsed.targetLanguage },
       gender: { S: parsed.gender },

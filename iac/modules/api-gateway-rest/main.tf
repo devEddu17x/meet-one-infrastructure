@@ -1,11 +1,12 @@
 resource "aws_api_gateway_rest_api" "api" {
-  name        = "${var.name_prefix}-api"
-  description = "REST API for ${var.name_prefix}"
-
+  name              = "${var.name_prefix}-api"
+  description       = "REST API for ${var.name_prefix}"
+  put_rest_api_mode = "overwrite"
   body = templatefile("${path.module}/openapi.yaml.tftpl", {
     name_prefix                      = var.name_prefix
     create_profile_lambda_invoke_arn = var.create_profile_lambda_invoke_arn
     get_profile_lambda_invoke_arn    = var.get_profile_lambda_invoke_arn
+    cognito_user_pool_arn            = var.cognito_user_pool_arn
   })
 
   endpoint_configuration {
