@@ -37,3 +37,24 @@ data "aws_iam_policy_document" "add_to_group_policy" {
     resources = ["*", "arn:aws:logs:*:*:*"]
   }
 }
+
+
+data "aws_iam_policy_document" "connect_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:PutItem"
+    ]
+    resources = [module.dynamodb.dynamodb_connections_table_arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+
