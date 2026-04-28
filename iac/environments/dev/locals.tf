@@ -1,29 +1,3 @@
-data "aws_iam_policy_document" "create_profile_policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "dynamodb:PutItem",
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = [module.dynamodb.dynamodb_users_table_arn, "arn:aws:logs:*:*:*"]
-  }
-}
-
-data "aws_iam_policy_document" "get_profile_policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "dynamodb:GetItem",
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = [module.dynamodb.dynamodb_users_table_arn, "arn:aws:logs:*:*:*"]
-  }
-}
-
 locals {
   default_tags = {
     Project     = var.project_name
@@ -54,6 +28,15 @@ locals {
       timeout     = 3
       memory_size = 256
       role_policy = data.aws_iam_policy_document.get_profile_policy.json
+    }
+    "add_to_group" = {
+      handler     = "index.handler"
+      runtime     = "nodejs24.x"
+      source_path = "../../../services/lambdas/cognito/post_confirmation_trigger"
+      environment = {}
+      timeout     = 5
+      memory_size = 256
+      role_policy = data.aws_iam_policy_document.add_to_group_policy.json
     }
   }
 }

@@ -7,3 +7,8 @@ variable "app_email_subject" {
   type        = string
   default     = "meet-one"
 }
+
+variable "post_confirmation_lambda_arn" {
+  description = "ARN of the Lambda function to invoke after user confirmation"
+  type        = string
+}
