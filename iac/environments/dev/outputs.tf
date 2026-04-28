@@ -73,3 +73,17 @@ output "api_invoke_url" {
   description = "The Invoke URL of the deployed API Gateway stage"
   value       = module.api_gateway_rest.api_invoke_url
 }
+output "api_websocket_id" {
+  description = "The ID of the API Gateway"
+  value       = module.api_gateway_websocket.api_websocket_id
+}
+
+output "api_websocket_execution_arn" {
+  description = "The Execution ARN of the API Gateway (used to grant permissions to Lambda)"
+  value       = module.api_gateway_websocket.api_websocket_execution_arn
+}
+
+output "api_websocket_invoke_url" {
+  description = "The Invoke URL of the deployed API Gateway stage"
+  value       = module.api_gateway_websocket.api_websocket_invoke_url
+}

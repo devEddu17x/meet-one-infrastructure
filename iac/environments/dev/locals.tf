@@ -38,5 +38,16 @@ locals {
       memory_size = 256
       role_policy = data.aws_iam_policy_document.add_to_group_policy.json
     }
+    "connect" = {
+      handler     = "index.handler"
+      runtime     = "nodejs24.x"
+      source_path = "../../../services/lambdas/connections/connect"
+      environment = {
+        CONNECTIONS_TABLE = module.dynamodb.dynamodb_connections_table_name
+      }
+      timeout     = 5
+      memory_size = 256
+      role_policy = data.aws_iam_policy_document.connect_policy.json
+    }
   }
 }
