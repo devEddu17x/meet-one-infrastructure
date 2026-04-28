@@ -10,3 +10,7 @@ variable "get_profile_lambda_invoke_arn" {
   description = "Get profile lambda ARN"
   type        = string
 }
+variable "cognito_user_pool_arn" {
+  description = "ARN of the Cognito User Pool"
+  type        = string
+}
