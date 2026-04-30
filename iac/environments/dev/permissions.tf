@@ -23,3 +23,12 @@ resource "aws_lambda_permission" "apigw_invoke_disconnect" {
 
   source_arn = "${module.api_gateway_websocket.api_websocket_execution_arn}/*/*"
 }
+resource "aws_lambda_permission" "apigw_invoke_find_match" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda.lambda_names["find_match"]
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${module.api_gateway_websocket.api_websocket_execution_arn}/*/*"
+}
+
