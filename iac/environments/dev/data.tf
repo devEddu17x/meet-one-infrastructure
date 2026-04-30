@@ -58,3 +58,23 @@ data "aws_iam_policy_document" "connect_policy" {
   }
 }
 
+data "aws_iam_policy_document" "disconnect_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:DeleteItem",
+      "dynamodb:GetItem"
+    ]
+    resources = [module.dynamodb.dynamodb_connections_table_arn, module.dynamodb.dynamodb_matchmaking_table_arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+

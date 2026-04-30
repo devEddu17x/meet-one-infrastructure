@@ -7,3 +7,8 @@ variable "connect_lambda_invoke_arn" {
   description = "Connect lambda ARN"
   type        = string
 }
+
+variable "disconnect_lambda_invoke_arn" {
+  description = "Disconnect lambda ARN"
+  type        = string
+}

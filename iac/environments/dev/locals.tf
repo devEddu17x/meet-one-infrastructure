@@ -49,5 +49,18 @@ locals {
       memory_size = 256
       role_policy = data.aws_iam_policy_document.connect_policy.json
     }
+
+    "disconnect" = {
+      handler     = "index.handler"
+      runtime     = "nodejs24.x"
+      source_path = "../../../services/lambdas/connections/disconnect"
+      environment = {
+        CONNECTIONS_TABLE = module.dynamodb.dynamodb_connections_table_name
+        MATCHMAKING_TABLE = module.dynamodb.dynamodb_matchmaking_table_name
+      }
+      timeout     = 5
+      memory_size = 256
+      role_policy = data.aws_iam_policy_document.disconnect_policy.json
+    }
   }
 }
