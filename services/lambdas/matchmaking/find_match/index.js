@@ -9,12 +9,12 @@ import {
   ApiGatewayManagementApiClient,
   PostToConnectionCommand,
 } from "@aws-sdk/client-apigatewaymanagementapi";
-import { notifyClient } from "./notify-client";
-import { setConnectionStatus } from "./set-connection-status";
+import { notifyClient } from "./notify-client.js";
+import { setConnectionStatus } from "./set-connection-status.js";
 import { startsWith, z } from "zod";
-import { languages } from "./language";
-import { countries } from "./countries";
-import { MatchmakingRequestSchema } from "./schemas";
+import { languages } from "./language.js";
+import { countries } from "./countries.js";
+import { MatchmakingRequestSchema } from "./schemas.js";
 
 const dynamoClient = new DynamoDBClient({});
 const { CONNECTIONS_TABLE, MATCHMAKING_TABLE } = process.env;
@@ -26,14 +26,20 @@ export const handler = async (event) => {
   try {
     parsedBody = MatchmakingRequestSchema.parse(body);
   } catch (err) {
+    console.error("Validation Error:", err);
     return {
       statusCode: 400,
       body: JSON.stringify({
         error: "Validation failed",
-        details: err.errors,
+        details: err,
       }),
     };
   }
+
+  console.log(
+    "Validation passed. UserData:",
+    JSON.stringify(parsedBody.userData),
+  );
 
   const domainName = event.requestContext.domainName;
   const stage = event.requestContext.stage;
@@ -64,9 +70,10 @@ export const handler = async (event) => {
     /**
      * 2. Search candidates to make match
      */
+    console.log("Searching candidates for:", searchPK);
     const queryParams = {
       TableName: MATCHMAKING_TABLE,
-      KeyConditionExpression: "PK = :pk",
+      KeyConditionExpression: "targetLanguageShard = :pk",
       ExpressionAttributeValues: {
         ":pk": { S: searchPK },
       },
@@ -74,6 +81,7 @@ export const handler = async (event) => {
     };
 
     const { Items } = await dynamoClient.send(new QueryCommand(queryParams));
+    console.log("Candidates found:", Items ? Items.length : 0);
 
     let bestMatch = null;
     let highestScore = -1;
@@ -110,25 +118,36 @@ export const handler = async (event) => {
      * and we just join the queue.
      */
     if (bestMatch && (highestScore > 0 || userData.targetLanguage === "any")) {
+      console.log("Attempting match with candidate:", bestMatch.userId.S);
       try {
         await dynamoClient.send(
           new DeleteItemCommand({
             TableName: MATCHMAKING_TABLE,
             Key: {
-              PK: { S: bestMatch.PK.S },
-              SK: { N: bestMatch.SK.N },
+              targetLanguageShard: { S: bestMatch.targetLanguageShard.S },
+              createdAt: { N: bestMatch.createdAt.N },
             },
-            ConditionExpression: "attribute_exists(PK)",
+            ConditionExpression: "attribute_exists(targetLanguageShard)",
           }),
         );
 
-        await setConnectionStatus(connectionId, "BUSY");
-        await setConnectionStatus(bestMatch.connectionId.S, "BUSY");
+        await setConnectionStatus(
+          dynamoClient,
+          connectionId,
+          "BUSY",
+          CONNECTIONS_TABLE,
+        );
+        await setConnectionStatus(
+          dynamoClient,
+          bestMatch.connectionId.S,
+          "BUSY",
+          CONNECTIONS_TABLE,
+        );
 
         /**
          * 5. Notify callee
          */
-        await notifyClient(bestMatch.connectionId.S, {
+        await notifyClient(apiGwClient, bestMatch.connectionId.S, {
           action: "match_found",
           role: "callee",
           peerConnectionId: connectionId,
@@ -138,19 +157,21 @@ export const handler = async (event) => {
         /**
          * 6. Notify caller: who offers webRTC connection
          */
+        await notifyClient(apiGwClient, connectionId, {
+          action: "match_found",
+          role: "caller",
+          peerConnectionId: bestMatch.connectionId.S,
+          peerData: {
+            userId: bestMatch.userId.S,
+            nativeLanguage: bestMatch.nativeLanguage.S,
+            targetLanguage: bestMatch.targetLanguage.S,
+            location: bestMatch.location?.S,
+          },
+        });
+
         return {
           statusCode: 200,
-          body: JSON.stringify({
-            action: "match_found",
-            role: "caller",
-            peerConnectionId: bestMatch.connectionId.S,
-            peerData: {
-              userId: bestMatch.userId.S,
-              nativeLanguage: bestMatch.nativeLanguage.S,
-              targetLanguage: bestMatch.targetLanguage.S,
-              location: bestMatch.location?.S,
-            },
-          }),
+          body: "Matched",
         };
       } catch (err) {
         if (err.name === "ConditionalCheckFailedException") {
@@ -167,6 +188,7 @@ export const handler = async (event) => {
     /**
      * 7. No match found, join the queue
      */
+    console.log("No match found, joining queue.");
     const timestamp = Date.now().toString();
     const ttl = Math.floor(Date.now() / 1000) + 5 * 60; // 5 minutes TTL
     const myQueuePK =
@@ -176,8 +198,8 @@ export const handler = async (event) => {
       new PutItemCommand({
         TableName: MATCHMAKING_TABLE,
         Item: {
-          PK: { S: myQueuePK },
-          SK: { N: timestamp },
+          targetLanguageShard: { S: myQueuePK },
+          createdAt: { N: timestamp },
           userId: { S: userData.userId },
           connectionId: { S: connectionId },
           nativeLanguage: { S: userData.nativeLanguage },
@@ -189,8 +211,9 @@ export const handler = async (event) => {
     );
 
     /**
-     * 8. Update connection status to "MATCHING" and store queue position (PK+SK)
+     * 8. Update connection status to "MATCHING" and store queue position
      */
+    console.log("Updating connection status.");
     await dynamoClient.send(
       new UpdateItemCommand({
         TableName: CONNECTIONS_TABLE,
@@ -205,9 +228,14 @@ export const handler = async (event) => {
       }),
     );
 
+    // Enviar el mensaje explícitamente a través de Management API
+    await notifyClient(apiGwClient, connectionId, {
+      action: "waiting_in_queue",
+    });
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ action: "waiting_in_queue" }),
+      body: "Enqueued",
     };
   } catch (error) {
     console.error("Critical error in findMatch:", error);

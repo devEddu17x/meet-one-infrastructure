@@ -1,7 +1,8 @@
-import { languages } from "./language";
-import { countries } from "./countries";
+import { z } from "zod";
+import { languages } from "./language.js";
+import { countries } from "./countries.js";
 export const MatchmakingRequestSchema = z.object({
-  action: z.string().equals(["find_match"]),
+  action: z.literal("find_match"),
   userData: z.object({
     userId: z
       .string()

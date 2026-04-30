@@ -1,6 +1,8 @@
-export async function notifyClient(connId, payload) {
+import { PostToConnectionCommand } from "@aws-sdk/client-apigatewaymanagementapi";
+
+export async function notifyClient(apiClient, connId, payload) {
   try {
-    await apiGwClient.send(
+    await apiClient.send(
       new PostToConnectionCommand({
         ConnectionId: connId,
         Data: new TextEncoder().encode(JSON.stringify(payload)),

@@ -1,8 +1,9 @@
-export async function setConnectionStatus(connId, status) {
+import { UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+export async function setConnectionStatus(dynamoClient, connId, status, table) {
   try {
     await dynamoClient.send(
       new UpdateItemCommand({
-        TableName: CONNECTIONS_TABLE,
+        TableName: table,
         Key: { connectionId: { S: connId } },
         UpdateExpression: "SET #status = :s",
         ExpressionAttributeNames: { "#status": "status" },
