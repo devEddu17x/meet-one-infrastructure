@@ -29,4 +29,5 @@ module "api_gateway_websocket" {
   name_prefix                  = "${var.project_name}-${var.environment}"
   connect_lambda_invoke_arn    = module.lambda.lambda_invoke_arns["connect"]
   disconnect_lambda_invoke_arn = module.lambda.lambda_invoke_arns["disconnect"]
+  find_match_lambda_invoke_arn = module.lambda.lambda_invoke_arns["find_match"]
 }

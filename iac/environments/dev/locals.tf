@@ -62,5 +62,18 @@ locals {
       memory_size = 256
       role_policy = data.aws_iam_policy_document.disconnect_policy.json
     }
+
+    "find_match" = {
+      handler     = "index.handler"
+      runtime     = "nodejs24.x"
+      source_path = "../../../services/lambdas/matchmaking/find_match"
+      environment = {
+        CONNECTIONS_TABLE = module.dynamodb.dynamodb_connections_table_name
+        MATCHMAKING_TABLE = module.dynamodb.dynamodb_matchmaking_table_name
+      }
+      timeout     = 7
+      memory_size = 256
+      role_policy = data.aws_iam_policy_document.find_match_policy.json
+    }
   }
 }

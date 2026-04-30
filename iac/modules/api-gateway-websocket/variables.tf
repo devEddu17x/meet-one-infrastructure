@@ -12,3 +12,8 @@ variable "disconnect_lambda_invoke_arn" {
   description = "Disconnect lambda ARN"
   type        = string
 }
+
+variable "find_match_lambda_invoke_arn" {
+  description = "Find Match lambda ARN"
+  type        = string
+}

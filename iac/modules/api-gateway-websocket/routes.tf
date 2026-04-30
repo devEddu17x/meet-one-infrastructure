@@ -14,3 +14,9 @@ resource "aws_apigatewayv2_route" "route_disconnect" {
   route_key = "$disconnect"
   target    = "integrations/${aws_apigatewayv2_integration.integration_disconnect.id}"
 }
+
+resource "aws_apigatewayv2_route" "route_find_match" {
+  api_id    = aws_apigatewayv2_api.api_websocket.id
+  route_key = "find_match"
+  target    = "integrations/${aws_apigatewayv2_integration.integration_find_match.id}"
+}
