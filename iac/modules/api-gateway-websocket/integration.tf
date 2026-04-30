@@ -11,3 +11,10 @@ resource "aws_apigatewayv2_integration" "integration_disconnect" {
   integration_method = "POST"
   integration_uri    = var.disconnect_lambda_invoke_arn
 }
+
+resource "aws_apigatewayv2_integration" "integration_find_match" {
+  api_id             = aws_apigatewayv2_api.api_websocket.id
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+  integration_uri    = var.find_match_lambda_invoke_arn
+}
