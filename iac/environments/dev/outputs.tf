@@ -87,3 +87,12 @@ output "api_websocket_invoke_url" {
   description = "The Invoke URL of the deployed API Gateway stage"
   value       = module.api_gateway_websocket.api_websocket_invoke_url
 }
+
+# output "cloudflare_turn_key_id" {
+#   value = module.cloudflare_calls.cloudflare_turn_key_id
+# }
+
+# output "cloudflare_turn_key_secret" {
+#   value     = module.cloudflare_calls.cloudflare_turn_key_secret
+#   sensitive = true
+# }
