@@ -145,29 +145,27 @@ export const handler = async (event) => {
         );
 
         /**
-         * 5. Notify callee
+         * 5. Notify callee and caller
          */
-        await notifyClient(apiGwClient, bestMatch.connectionId.S, {
-          action: "match_found",
-          role: "callee",
-          peerConnectionId: connectionId,
-          peerData: userData,
-        });
-
-        /**
-         * 6. Notify caller: who offers webRTC connection
-         */
-        await notifyClient(apiGwClient, connectionId, {
-          action: "match_found",
-          role: "caller",
-          peerConnectionId: bestMatch.connectionId.S,
-          peerData: {
-            userId: bestMatch.userId.S,
-            nativeLanguage: bestMatch.nativeLanguage.S,
-            targetLanguage: bestMatch.targetLanguage.S,
-            location: bestMatch.location?.S,
-          },
-        });
+        await Promise.all([
+          notifyClient(apiGwClient, bestMatch.connectionId.S, {
+            action: "match_found",
+            role: "callee",
+            peerConnectionId: connectionId,
+            peerData: userData,
+          }),
+          notifyClient(apiGwClient, connectionId, {
+            action: "match_found",
+            role: "caller",
+            peerConnectionId: bestMatch.connectionId.S,
+            peerData: {
+              userId: bestMatch.userId.S,
+              nativeLanguage: bestMatch.nativeLanguage.S,
+              targetLanguage: bestMatch.targetLanguage.S,
+              location: bestMatch.location?.S,
+            },
+          }),
+        ]);
 
         return {
           statusCode: 200,
@@ -186,7 +184,7 @@ export const handler = async (event) => {
     }
 
     /**
-     * 7. No match found, join the queue
+     * 6. No match found, join the queue
      */
     console.log("No match found, joining queue.");
     const timestamp = Date.now().toString();
@@ -211,7 +209,7 @@ export const handler = async (event) => {
     );
 
     /**
-     * 8. Update connection status to "MATCHING" and store queue position
+     * 7. Update connection status to "MATCHING" and store queue position
      */
     console.log("Updating connection status.");
     await dynamoClient.send(
@@ -228,7 +226,6 @@ export const handler = async (event) => {
       }),
     );
 
-    // Enviar el mensaje explícitamente a través de Management API
     await notifyClient(apiGwClient, connectionId, {
       action: "waiting_in_queue",
     });
