@@ -32,3 +32,12 @@ resource "aws_lambda_permission" "apigw_invoke_find_match" {
   source_arn = "${module.api_gateway_websocket.api_websocket_execution_arn}/*/*"
 }
 
+resource "aws_lambda_permission" "apigw_invoke_forward_signal" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda.lambda_names["forward_signal"]
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${module.api_gateway_websocket.api_websocket_execution_arn}/*/*"
+}
+
