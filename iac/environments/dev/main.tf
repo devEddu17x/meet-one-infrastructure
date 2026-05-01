@@ -10,6 +10,15 @@ module "dynamodb" {
   name_prefix = "${var.project_name}-${var.environment}"
 }
 
+# Disable this module until issue on github is resolved:
+# ISSUE: Bug: cloudflare_calls_turn_app fails on refresh/plan with missing required key_id parameter
+# https://github.com/cloudflare/terraform-provider-cloudflare/issues/7079
+# module "cloudflare_calls" {
+#   source                = "../../modules/cloudflare/turn-server"
+#   name_prefix           = "${var.project_name}-${var.environment}"
+#   cloudflare_account_id = var.cloudflare_account_id
+# }
+
 module "lambda" {
   source      = "../../modules/lambda"
   name_prefix = "${var.project_name}-${var.environment}"

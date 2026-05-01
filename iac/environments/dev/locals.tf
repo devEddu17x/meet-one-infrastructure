@@ -68,8 +68,10 @@ locals {
       runtime     = "nodejs24.x"
       source_path = "../../../services/lambdas/matchmaking/find_match"
       environment = {
-        CONNECTIONS_TABLE = module.dynamodb.dynamodb_connections_table_name
-        MATCHMAKING_TABLE = module.dynamodb.dynamodb_matchmaking_table_name
+        CONNECTIONS_TABLE         = module.dynamodb.dynamodb_connections_table_name
+        MATCHMAKING_TABLE         = module.dynamodb.dynamodb_matchmaking_table_name
+        CLOUDFLARE_TURN_TOKEN_ID  = var.cloudflare_turn_token_id
+        CLOUDFLARE_TURN_API_TOKEN = var.cloudflare_turn_api_token
       }
       timeout     = 7
       memory_size = 256

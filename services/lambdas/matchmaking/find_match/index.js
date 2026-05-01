@@ -11,6 +11,7 @@ import {
 } from "@aws-sdk/client-apigatewaymanagementapi";
 import { notifyClient } from "./notify-client.js";
 import { setConnectionStatus } from "./set-connection-status.js";
+import { getTurnServerCredentials } from "./get-turn-server-credentials.js";
 import { startsWith, z } from "zod";
 import { languages } from "./language.js";
 import { countries } from "./countries.js";
@@ -131,43 +132,51 @@ export const handler = async (event) => {
           }),
         );
 
-        await setConnectionStatus(
-          dynamoClient,
-          connectionId,
-          "BUSY",
-          CONNECTIONS_TABLE,
-        );
-        await setConnectionStatus(
-          dynamoClient,
-          bestMatch.connectionId.S,
-          "BUSY",
-          CONNECTIONS_TABLE,
-        );
+        await Promise.all([
+          setConnectionStatus(
+            dynamoClient,
+            connectionId,
+            "BUSY",
+            CONNECTIONS_TABLE,
+          ),
+          setConnectionStatus(
+            dynamoClient,
+            bestMatch.connectionId.S,
+            "BUSY",
+            CONNECTIONS_TABLE,
+          ),
+        ]);
 
         /**
-         * 5. Notify callee
+         * 5. Fetch ICE Servers from Cloudflare TURN service
          */
-        await notifyClient(apiGwClient, bestMatch.connectionId.S, {
-          action: "match_found",
-          role: "callee",
-          peerConnectionId: connectionId,
-          peerData: userData,
-        });
+        console.log("Fetching TURN credentials for the session...");
+        const iceServers = await getTurnServerCredentials();
 
         /**
-         * 6. Notify caller: who offers webRTC connection
+         * 6. Notify callee and caller
          */
-        await notifyClient(apiGwClient, connectionId, {
-          action: "match_found",
-          role: "caller",
-          peerConnectionId: bestMatch.connectionId.S,
-          peerData: {
-            userId: bestMatch.userId.S,
-            nativeLanguage: bestMatch.nativeLanguage.S,
-            targetLanguage: bestMatch.targetLanguage.S,
-            location: bestMatch.location?.S,
-          },
-        });
+        await Promise.all([
+          notifyClient(apiGwClient, bestMatch.connectionId.S, {
+            action: "match_found",
+            role: "callee",
+            peerConnectionId: connectionId,
+            peerData: userData,
+            iceServers,
+          }),
+          notifyClient(apiGwClient, connectionId, {
+            action: "match_found",
+            role: "caller",
+            peerConnectionId: bestMatch.connectionId.S,
+            peerData: {
+              userId: bestMatch.userId.S,
+              nativeLanguage: bestMatch.nativeLanguage.S,
+              targetLanguage: bestMatch.targetLanguage.S,
+              location: bestMatch.location?.S,
+            },
+            iceServers,
+          }),
+        ]);
 
         return {
           statusCode: 200,
@@ -228,7 +237,6 @@ export const handler = async (event) => {
       }),
     );
 
-    // Enviar el mensaje explícitamente a través de Management API
     await notifyClient(apiGwClient, connectionId, {
       action: "waiting_in_queue",
     });

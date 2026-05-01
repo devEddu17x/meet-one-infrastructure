@@ -22,8 +22,32 @@ variable "environment" {
   default     = "bootstrap"
 }
 
-variable "cloudflare_api_token" {
-  description = "Cloudflare account API TOKEN"
+variable "cloudflare_api_key" {
+  description = "Cloudflare account API KEY"
   type        = string
   default     = null
 }
+
+# variable "cloudflare_account_id" {
+#   description = "ID de la cuenta de Cloudflare"
+#   type        = string
+# }
+
+# variable "cloudflare_account_email" {
+#   description = "Email associated with the Cloudflare account"
+#   type        = string
+# }
+
+
+variable "cloudflare_turn_token_id" {
+
+  description = "Cloudflare TURN Token ID for the TURN server"
+  type        = string
+}
+
+variable "cloudflare_turn_api_token" {
+
+  description = "Cloudflare TURN API token for the TURN server"
+  type        = string
+}
+
