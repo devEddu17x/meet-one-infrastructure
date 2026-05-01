@@ -20,3 +20,9 @@ resource "aws_apigatewayv2_route" "route_find_match" {
   route_key = "find_match"
   target    = "integrations/${aws_apigatewayv2_integration.integration_find_match.id}"
 }
+
+resource "aws_apigatewayv2_route" "route_forward_signal" {
+  api_id    = aws_apigatewayv2_api.api_websocket.id
+  route_key = "forward_signal"
+  target    = "integrations/${aws_apigatewayv2_integration.integration_forward_signal.id}"
+}

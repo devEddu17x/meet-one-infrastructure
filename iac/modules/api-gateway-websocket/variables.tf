@@ -17,3 +17,8 @@ variable "find_match_lambda_invoke_arn" {
   description = "Find Match lambda ARN"
   type        = string
 }
+
+variable "forward_signal_lambda_invoke_arn" {
+  description = "Forward Signal lambda ARN"
+  type        = string
+}

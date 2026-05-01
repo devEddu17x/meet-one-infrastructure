@@ -114,3 +114,22 @@ data "aws_iam_policy_document" "find_match_policy" {
     resources = ["arn:aws:execute-api:*:*:*/*/*/@connections/*"]
   }
 }
+
+data "aws_iam_policy_document" "forward_signal_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "execute-api:ManageConnections"
+    ]
+    resources = ["arn:aws:execute-api:*:*:*/*/*/@connections/*"]
+  }
+}
