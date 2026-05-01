@@ -37,3 +37,17 @@ variable "cloudflare_api_key" {
 #   description = "Email associated with the Cloudflare account"
 #   type        = string
 # }
+
+
+variable "cloudflare_turn_token_id" {
+
+  description = "Cloudflare TURN Token ID for the TURN server"
+  type        = string
+}
+
+variable "cloudflare_turn_api_token" {
+
+  description = "Cloudflare TURN API token for the TURN server"
+  type        = string
+}
+
