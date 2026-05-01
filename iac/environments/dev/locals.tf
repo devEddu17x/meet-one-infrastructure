@@ -75,5 +75,15 @@ locals {
       memory_size = 256
       role_policy = data.aws_iam_policy_document.find_match_policy.json
     }
+
+    "forward_signal" = {
+      handler     = "index.handler"
+      runtime     = "nodejs24.x"
+      source_path = "../../../services/lambdas/connections/foward-signal"
+      environment = {}
+      timeout     = 5
+      memory_size = 256
+      role_policy = data.aws_iam_policy_document.forward_signal_policy.json
+    }
   }
 }
