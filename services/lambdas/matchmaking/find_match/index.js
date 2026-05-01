@@ -11,6 +11,7 @@ import {
 } from "@aws-sdk/client-apigatewaymanagementapi";
 import { notifyClient } from "./notify-client.js";
 import { setConnectionStatus } from "./set-connection-status.js";
+import { getTurnServerCredentials } from "./get-turn-server-credentials.js";
 import { startsWith, z } from "zod";
 import { languages } from "./language.js";
 import { countries } from "./countries.js";
@@ -131,21 +132,29 @@ export const handler = async (event) => {
           }),
         );
 
-        await setConnectionStatus(
-          dynamoClient,
-          connectionId,
-          "BUSY",
-          CONNECTIONS_TABLE,
-        );
-        await setConnectionStatus(
-          dynamoClient,
-          bestMatch.connectionId.S,
-          "BUSY",
-          CONNECTIONS_TABLE,
-        );
+        await Promise.all([
+          setConnectionStatus(
+            dynamoClient,
+            connectionId,
+            "BUSY",
+            CONNECTIONS_TABLE,
+          ),
+          setConnectionStatus(
+            dynamoClient,
+            bestMatch.connectionId.S,
+            "BUSY",
+            CONNECTIONS_TABLE,
+          ),
+        ]);
 
         /**
-         * 5. Notify callee and caller
+         * 5. Fetch ICE Servers from Cloudflare TURN service
+         */
+        console.log("Fetching TURN credentials for the session...");
+        const iceServers = await getTurnServerCredentials();
+
+        /**
+         * 6. Notify callee and caller
          */
         await Promise.all([
           notifyClient(apiGwClient, bestMatch.connectionId.S, {
@@ -153,6 +162,7 @@ export const handler = async (event) => {
             role: "callee",
             peerConnectionId: connectionId,
             peerData: userData,
+            iceServers,
           }),
           notifyClient(apiGwClient, connectionId, {
             action: "match_found",
@@ -164,6 +174,7 @@ export const handler = async (event) => {
               targetLanguage: bestMatch.targetLanguage.S,
               location: bestMatch.location?.S,
             },
+            iceServers,
           }),
         ]);
 
@@ -184,7 +195,7 @@ export const handler = async (event) => {
     }
 
     /**
-     * 6. No match found, join the queue
+     * 7. No match found, join the queue
      */
     console.log("No match found, joining queue.");
     const timestamp = Date.now().toString();
@@ -209,7 +220,7 @@ export const handler = async (event) => {
     );
 
     /**
-     * 7. Update connection status to "MATCHING" and store queue position
+     * 8. Update connection status to "MATCHING" and store queue position
      */
     console.log("Updating connection status.");
     await dynamoClient.send(
