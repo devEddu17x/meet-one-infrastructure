@@ -25,9 +25,10 @@ module "api_gateway_rest" {
 }
 
 module "api_gateway_websocket" {
-  source                       = "../../modules/api-gateway-websocket"
-  name_prefix                  = "${var.project_name}-${var.environment}"
-  connect_lambda_invoke_arn    = module.lambda.lambda_invoke_arns["connect"]
-  disconnect_lambda_invoke_arn = module.lambda.lambda_invoke_arns["disconnect"]
-  find_match_lambda_invoke_arn = module.lambda.lambda_invoke_arns["find_match"]
+  source                           = "../../modules/api-gateway-websocket"
+  name_prefix                      = "${var.project_name}-${var.environment}"
+  connect_lambda_invoke_arn        = module.lambda.lambda_invoke_arns["connect"]
+  disconnect_lambda_invoke_arn     = module.lambda.lambda_invoke_arns["disconnect"]
+  find_match_lambda_invoke_arn     = module.lambda.lambda_invoke_arns["find_match"]
+  forward_signal_lambda_invoke_arn = module.lambda.lambda_invoke_arns["forward_signal"]
 }
