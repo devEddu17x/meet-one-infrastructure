@@ -7,6 +7,7 @@ provider "aws" {
   }
 }
 
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
+# provider "cloudflare" {
+#   email   = var.cloudflare_account_email
+#   api_key = var.cloudflare_api_key
+# }
