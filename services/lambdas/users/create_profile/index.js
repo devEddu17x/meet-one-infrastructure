@@ -31,6 +31,10 @@ export const handler = async (event) => {
     if (!userId) {
       return {
         statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type,Authorization"
+        },
         body: JSON.stringify({ error: "User ID is required" }),
       };
     }
@@ -55,6 +59,10 @@ export const handler = async (event) => {
 
     return {
       statusCode: 201,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization"
+      },
       body: JSON.stringify({
         message: "Profile created",
         user: { ...parsed, userId },
@@ -64,6 +72,10 @@ export const handler = async (event) => {
     if (err instanceof z.ZodError) {
       return {
         statusCode: 400,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type,Authorization"
+        },
         body: JSON.stringify({
           error: "Validation failed",
           details: err.errors,
@@ -73,11 +85,19 @@ export const handler = async (event) => {
     if (err.name === "ConditionalCheckFailedException") {
       return {
         statusCode: 409,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Headers": "Content-Type,Authorization"
+        },
         body: JSON.stringify({ error: "Profile already exists" }),
       };
     }
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization"
+      },
       body: JSON.stringify({
         error: "Internal server error",
         details: err.message,
